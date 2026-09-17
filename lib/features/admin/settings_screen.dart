@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/db/database.dart';
@@ -246,7 +247,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ElevatedButton.icon(
             icon: const Icon(Icons.list_alt),
             onPressed: _showAuditLog,
-            child: const Text('View System Audit Log'),
+            label: const Text('View System Audit Log'),
           ),
         ],
       ),

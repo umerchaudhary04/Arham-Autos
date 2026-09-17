@@ -111,12 +111,12 @@ class _ImportWizardScreenState extends ConsumerState<ImportWizardScreen> {
                             icon: const Icon(Icons.folder_open),
                             label: const Text('Browse...'),
                             onPressed: () async {
-                              final result = await FilePicker.platform.pickFiles(
+                              final result = await FilePicker.pickFile(
                                 type: FileType.custom,
                                 allowedExtensions: ['accdb'],
                               );
-                              if (result != null && result.files.single.path != null) {
-                                setState(() => _selectedFile = result.files.single.path!);
+                              if (result != null && result.path != null) {
+                                setState(() => _selectedFile = result.path!);
                               }
                             },
                           ),
