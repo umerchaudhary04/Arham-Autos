@@ -8,9 +8,14 @@ class LedgerTypeNotifier extends Notifier<String> {
   String build() => 'Customer';
   void setType(String type) => state = type;
 }
-final ledgerTypeProvider = NotifierProvider<LedgerTypeNotifier, String>(() => LedgerTypeNotifier());
 
-final ledgerAccountsProvider = FutureProvider<List<AccountsLedgerData>>((ref) async {
+final ledgerTypeProvider = NotifierProvider<LedgerTypeNotifier, String>(
+  () => LedgerTypeNotifier(),
+);
+
+final ledgerAccountsProvider = FutureProvider<List<AccountsLedgerData>>((
+  ref,
+) async {
   final type = ref.watch(ledgerTypeProvider);
   final db = ref.watch(databaseProvider);
   if (db == null) return [];
@@ -33,7 +38,10 @@ class KhataLedgerScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Khata Ledger', style: Theme.of(context).textTheme.headlineMedium),
+              Text(
+                'Khata Ledger',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
               SegmentedButton<String>(
                 segments: const [
                   ButtonSegment(value: 'Customer', label: Text('Customers')),
@@ -41,7 +49,9 @@ class KhataLedgerScreen extends ConsumerWidget {
                 ],
                 selected: {selectedType},
                 onSelectionChanged: (Set<String> newSelection) {
-                  ref.read(ledgerTypeProvider.notifier).setType(newSelection.first);
+                  ref
+                      .read(ledgerTypeProvider.notifier)
+                      .setType(newSelection.first);
                 },
               ),
             ],
@@ -52,26 +62,35 @@ class KhataLedgerScreen extends ConsumerWidget {
             child: ledgerAsync.when(
               data: (accounts) {
                 if (accounts.isEmpty) {
-                  return Center(child: Text('No $selectedType accounts found.'));
+                  return Center(
+                    child: Text('No $selectedType accounts found.'),
+                  );
                 }
                 return ListView.builder(
                   itemCount: accounts.length,
                   itemBuilder: (context, index) {
                     final acc = accounts[index];
-                    final limit = acc.creditLimit ?? 100000.0; // Mock limit if null
+                    final limit =
+                        acc.creditLimit ?? 100000.0; // Mock limit if null
                     final progress = acc.currentBalance / limit;
-                    
+
                     return Card(
                       child: ListTile(
                         title: Text(acc.accountName),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Balance: ₨ ${acc.currentBalance} / Limit: ₨ $limit'),
+                            Text(
+                              'Balance: ₨ ${acc.currentBalance} / Limit: ₨ $limit',
+                            ),
                             const SizedBox(height: 4),
                             LinearProgressIndicator(
                               value: progress.clamp(0.0, 1.0),
-                              color: progress > 0.9 ? Colors.red : (progress > 0.7 ? Colors.orange : Colors.green),
+                              color: progress > 0.9
+                                  ? Colors.red
+                                  : (progress > 0.7
+                                        ? Colors.orange
+                                        : Colors.green),
                             ),
                           ],
                         ),
@@ -89,7 +108,7 @@ class KhataLedgerScreen extends ConsumerWidget {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, st) => Center(child: Text('Error: $e')),
             ),
-          )
+          ),
         ],
       ),
     );

@@ -16,7 +16,8 @@ class PosCartState {
     this.overrideReason,
   });
 
-  double get subtotal => items.fold(0, (sum, item) => sum + (item.unitPrice * item.quantity));
+  double get subtotal =>
+      items.fold(0, (sum, item) => sum + (item.unitPrice * item.quantity));
   double get total => subtotal - discount;
 
   PosCartState copyWith({
@@ -53,11 +54,17 @@ class PosCartNotifier extends Notifier<PosCartState> {
       newItems[existingIndex] = CartItem(
         partId: partId,
         quantity: existingItem.quantity + quantity,
-        unitPrice: existingItem.unitPrice, // Keep existing or update? Let's assume keep.
+        unitPrice: existingItem
+            .unitPrice, // Keep existing or update? Let's assume keep.
       );
       state = state.copyWith(items: newItems);
     } else {
-      state = state.copyWith(items: [...state.items, CartItem(partId: partId, quantity: quantity, unitPrice: unitPrice)]);
+      state = state.copyWith(
+        items: [
+          ...state.items,
+          CartItem(partId: partId, quantity: quantity, unitPrice: unitPrice),
+        ],
+      );
     }
   }
 
@@ -85,13 +92,13 @@ class PosCartNotifier extends Notifier<PosCartState> {
         totalAmount: state.subtotal,
         finalAmount: state.total,
       );
-      
+
       // Silent PDF render & print using invoiceId
       final printSvc = ref.read(printServiceProvider);
       await printSvc.printInvoiceSilently(
-        invoiceId, 
+        invoiceId,
         80, // Default 80mm for now, can be read from config
-        {'totalAmount': state.total} // Pass actual invoice data here
+        {'totalAmount': state.total}, // Pass actual invoice data here
       );
 
       clearCart();
@@ -103,4 +110,6 @@ class PosCartNotifier extends Notifier<PosCartState> {
   }
 }
 
-final posCartProvider = NotifierProvider<PosCartNotifier, PosCartState>(() => PosCartNotifier());
+final posCartProvider = NotifierProvider<PosCartNotifier, PosCartState>(
+  () => PosCartNotifier(),
+);

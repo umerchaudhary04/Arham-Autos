@@ -13,7 +13,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _usePin = true;
   String _pin = '';
-  
+
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -40,20 +40,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ref.read(idleLockProvider.notifier).resetTimer();
     } else {
       setState(() => _pin = '');
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid PIN')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Invalid PIN')));
     }
   }
 
   void _submitPassword() async {
-    final success = await ref.read(authProvider.notifier).loginWithPassword(
-      _usernameController.text, 
-      _passwordController.text
-    );
+    final success = await ref
+        .read(authProvider.notifier)
+        .loginWithPassword(_usernameController.text, _passwordController.text);
     if (!mounted) return;
     if (success) {
       ref.read(idleLockProvider.notifier).resetTimer();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Invalid Credentials')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Invalid Credentials')));
     }
   }
 
@@ -68,11 +71,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               const Icon(Icons.lock, size: 64, color: Colors.teal),
               const SizedBox(height: 32),
-              
+
               if (_usePin) ...[
-                Text('Enter PIN', style: Theme.of(context).textTheme.headlineMedium),
+                Text(
+                  'Enter PIN',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
                 const SizedBox(height: 16),
-                Text('*' * _pin.length, style: const TextStyle(fontSize: 48, letterSpacing: 8)),
+                Text(
+                  '*' * _pin.length,
+                  style: const TextStyle(fontSize: 48, letterSpacing: 8),
+                ),
                 const SizedBox(height: 16),
                 GridView.count(
                   shrinkWrap: true,
@@ -84,7 +93,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     for (int i = 1; i <= 9; i++)
                       ElevatedButton(
                         onPressed: () => _onPinPadPressed(i.toString()),
-                        child: Text(i.toString(), style: const TextStyle(fontSize: 24)),
+                        child: Text(
+                          i.toString(),
+                          style: const TextStyle(fontSize: 24),
+                        ),
                       ),
                     ElevatedButton(
                       onPressed: _onPinDelete,
@@ -101,19 +113,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
               ] else ...[
-                Text('Admin Login', style: Theme.of(context).textTheme.headlineMedium),
+                Text(
+                  'Admin Login',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
                 const SizedBox(height: 16),
-                TextField(controller: _usernameController, decoration: const InputDecoration(labelText: 'Username')),
+                TextField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(labelText: 'Username'),
+                ),
                 const SizedBox(height: 8),
-                TextField(controller: _passwordController, obscureText: true, decoration: const InputDecoration(labelText: 'Password')),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                ),
                 const SizedBox(height: 16),
-                ElevatedButton(onPressed: _submitPassword, child: const Text('Login')),
+                ElevatedButton(
+                  onPressed: _submitPassword,
+                  child: const Text('Login'),
+                ),
               ],
 
               const SizedBox(height: 32),
               TextButton(
                 onPressed: () => setState(() => _usePin = !_usePin),
-                child: Text(_usePin ? 'Switch to Password Login' : 'Switch to PIN Login'),
+                child: Text(
+                  _usePin ? 'Switch to Password Login' : 'Switch to PIN Login',
+                ),
               ),
             ],
           ),

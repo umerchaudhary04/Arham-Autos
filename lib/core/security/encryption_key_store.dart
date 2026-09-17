@@ -26,7 +26,11 @@ class DpapiKeyStore implements EncryptionKeyStore {
     // Generate a BitLocker-style key: XXXX-XXXX-XXXX-XXXX-XXXX-XXXX
     // We'll just generate random characters for this purpose.
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = List.generate(24, (index) => chars[(DateTime.now().microsecondsSinceEpoch + index) % chars.length]);
+    final random = List.generate(
+      24,
+      (index) =>
+          chars[(DateTime.now().microsecondsSinceEpoch + index) % chars.length],
+    );
     final buffer = StringBuffer();
     for (int i = 0; i < random.length; i++) {
       if (i > 0 && i % 4 == 0) buffer.write('-');

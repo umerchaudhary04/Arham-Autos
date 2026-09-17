@@ -36,8 +36,10 @@ class MigrationLog extends Table {
   TextColumn get sourceFile => text()();
   IntColumn get recordsImported => integer().nullable()();
   IntColumn get recordsFlagged => integer().nullable()();
-  TextColumn get performedBy => text().nullable()(); // TODO: References local_users(id)
-  DateTimeColumn get performedAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get performedBy =>
+      text().nullable()(); // TODO: References local_users(id)
+  DateTimeColumn get performedAt =>
+      dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {migrationId};
@@ -56,9 +58,11 @@ class ParkedCarts extends Table {
 class ReturnsClaims extends Table {
   TextColumn get claimId => text()();
   TextColumn get claimType => text()();
-  TextColumn get referenceInvoiceId => text().nullable()(); // TODO: References sales_invoices(invoice_id)
+  TextColumn get referenceInvoiceId =>
+      text().nullable()(); // TODO: References sales_invoices(invoice_id)
   TextColumn get initiatedBy => text()(); // TODO: References local_users(id)
-  TextColumn get status => text().withDefault(const Constant('PENDING_APPROVAL'))();
+  TextColumn get status =>
+      text().withDefault(const Constant('PENDING_APPROVAL'))();
   TextColumn get refundMethod => text().nullable()();
   TextColumn get approvedBy => text().nullable()();
   DateTimeColumn get approvedAt => dateTime().nullable()();
@@ -75,7 +79,8 @@ class LocalUsers extends Table {
   TextColumn get passwordHash => text()();
   TextColumn get pinHash => text()();
   TextColumn get role => text()(); // 'Admin', 'Manager', 'Operator'
-  TextColumn get preferredLanguage => text().withDefault(const Constant('en'))();
+  TextColumn get preferredLanguage =>
+      text().withDefault(const Constant('en'))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -107,7 +112,8 @@ class FifoInventoryBatches extends Table {
   IntColumn get originalQuantity => integer()();
   IntColumn get remainingQuantity => integer()();
   RealColumn get unitLandedCost => real()();
-  TextColumn get supplierId => text().nullable()(); // References accounts_ledger(accountId)
+  TextColumn get supplierId =>
+      text().nullable()(); // References accounts_ledger(accountId)
   DateTimeColumn get receivedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -127,7 +133,8 @@ class AccountsLedger extends Table {
 
 class SalesInvoices extends Table {
   TextColumn get invoiceId => text()();
-  TextColumn get customerId => text().nullable()(); // References accounts_ledger(accountId)
+  TextColumn get customerId =>
+      text().nullable()(); // References accounts_ledger(accountId)
   RealColumn get totalAmount => real()();
   RealColumn get discount => real().withDefault(const Constant(0.0))();
   RealColumn get finalAmount => real()();
@@ -142,7 +149,8 @@ class InvoiceItems extends Table {
   TextColumn get itemId => text()();
   TextColumn get invoiceId => text()(); // References sales_invoices(invoiceId)
   TextColumn get partId => text()(); // References auto_parts(partId)
-  TextColumn get batchId => text()(); // References fifo_inventory_batches(batchId)
+  TextColumn get batchId =>
+      text()(); // References fifo_inventory_batches(batchId)
   IntColumn get quantity => integer()();
   RealColumn get unitPrice => real()();
   RealColumn get unitCogs => real()(); // Cost of Goods Sold from the FIFO batch
@@ -151,28 +159,26 @@ class InvoiceItems extends Table {
   Set<Column> get primaryKey => {itemId};
 }
 
-@DriftDatabase(tables: [
-  BackupLog,
-  AuditLog,
-  MigrationLog,
-  ParkedCarts,
-  ReturnsClaims,
-  LocalUsers,
-  AppConfig,
-  AutoParts,
-  FifoInventoryBatches,
-  AccountsLedger,
-  SalesInvoices,
-  InvoiceItems,
-], daos: [
-  PartsDao,
-  PosDao,
-  LedgerDao,
-  UsersDao,
-  ReportsDao,
-])
+@DriftDatabase(
+  tables: [
+    BackupLog,
+    AuditLog,
+    MigrationLog,
+    ParkedCarts,
+    ReturnsClaims,
+    LocalUsers,
+    AppConfig,
+    AutoParts,
+    FifoInventoryBatches,
+    AccountsLedger,
+    SalesInvoices,
+    InvoiceItems,
+  ],
+  daos: [PartsDao, PosDao, LedgerDao, UsersDao, ReportsDao],
+)
 class AppDatabase extends _$AppDatabase {
-  AppDatabase(String encryptionKey, {QueryExecutor? executor}) : super(executor ?? _openConnection(encryptionKey));
+  AppDatabase(String encryptionKey, {QueryExecutor? executor})
+    : super(executor ?? _openConnection(encryptionKey));
 
   @override
   int get schemaVersion => 1;
@@ -185,7 +191,7 @@ LazyDatabase _openConnection(String encryptionKey) {
     if (!await appDir.exists()) {
       await appDir.create(recursive: true);
     }
-    
+
     final file = File('${appDir.path}\\arham_autos.db');
 
     return NativeDatabase.createInBackground(

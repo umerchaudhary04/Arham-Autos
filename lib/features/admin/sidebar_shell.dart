@@ -7,7 +7,10 @@ import '../pos/pos_billing_screen.dart';
 import '../parts/parts_catalog_screen.dart';
 import '../ledger/khata_ledger_screen.dart';
 import '../purchases/grn_screen.dart';
+import '../reports/reports_screen.dart';
 import '../import/import_wizard_screen.dart';
+import '../returns/returns_claims_screen.dart';
+import '../admin/backup_restore_screen.dart';
 import 'settings_screen.dart';
 
 class SidebarShell extends ConsumerStatefulWidget {
@@ -36,13 +39,17 @@ class _SidebarShellState extends ConsumerState<SidebarShell> {
     final user = ref.read(authProvider).user;
     if (user != null) {
       final db = ref.read(databaseProvider);
-      
+
       // Save parked cart (Mock payload for now, real cart serialization comes in Phase 4)
-      await db?.into(db.parkedCarts).insertOnConflictUpdate(ParkedCartsCompanion.insert(
-        parkedId: 'cart_${user.id}',
-        userId: user.id,
-        cartPayloadJson: '{"items": []}',
-      ));
+      await db
+          ?.into(db.parkedCarts)
+          .insertOnConflictUpdate(
+            ParkedCartsCompanion.insert(
+              parkedId: 'cart_${user.id}',
+              userId: user.id,
+              cartPayloadJson: '{"items": []}',
+            ),
+          );
     }
     ref.read(authProvider.notifier).switchUser();
   }
@@ -56,16 +63,61 @@ class _SidebarShellState extends ConsumerState<SidebarShell> {
     final isManager = user.role == 'Manager' || isAdmin;
 
     final navItems = <_NavItem>[
-      _NavItem(icon: Icons.dashboard, label: 'Dashboard', screen: const DashboardScreen()),
-      _NavItem(icon: Icons.point_of_sale, label: 'POS Billing', screen: const PosBillingScreen()),
-      _NavItem(icon: Icons.inventory_2, label: 'Parts Catalog', screen: const PartsCatalogScreen()),
-      _NavItem(icon: Icons.book, label: 'Khata Ledger', screen: const KhataLedgerScreen()),
-      if (isManager) _NavItem(icon: Icons.local_shipping, label: 'Purchases / GRN', screen: const GrnScreen()),
-      _NavItem(icon: Icons.assignment_return, label: 'Returns & Claims', screen: const _PlaceholderScreen('Returns - Phase 4')),
-      if (isManager) _NavItem(icon: Icons.analytics, label: 'Reports', screen: const _PlaceholderScreen('Reports - Phase 5')),
-      if (isAdmin) _NavItem(icon: Icons.backup, label: 'Backup & Restore', screen: const _PlaceholderScreen('Backup - Phase 4')),
-      if (isAdmin) _NavItem(icon: Icons.import_export, label: 'Legacy Import Wizard', screen: const ImportWizardScreen()),
-      if (isAdmin) _NavItem(icon: Icons.settings, label: 'Settings', screen: const SettingsScreen()),
+      _NavItem(
+        icon: Icons.dashboard,
+        label: 'Dashboard',
+        screen: const DashboardScreen(),
+      ),
+      _NavItem(
+        icon: Icons.point_of_sale,
+        label: 'POS Billing',
+        screen: const PosBillingScreen(),
+      ),
+      _NavItem(
+        icon: Icons.inventory_2,
+        label: 'Parts Catalog',
+        screen: const PartsCatalogScreen(),
+      ),
+      _NavItem(
+        icon: Icons.book,
+        label: 'Khata Ledger',
+        screen: const KhataLedgerScreen(),
+      ),
+      if (isManager)
+        _NavItem(
+          icon: Icons.local_shipping,
+          label: 'Purchases / GRN',
+          screen: const GrnScreen(),
+        ),
+      _NavItem(
+        icon: Icons.assignment_return,
+        label: 'Returns & Claims',
+        screen: const ReturnsClaimsScreen(),
+      ),
+      if (isManager)
+        _NavItem(
+          icon: Icons.analytics,
+          label: 'Reports',
+          screen: const ReportsScreen(),
+        ),
+      if (isAdmin)
+        _NavItem(
+          icon: Icons.backup,
+          label: 'Backup & Restore',
+          screen: const BackupRestoreScreen(),
+        ),
+      if (isAdmin)
+        _NavItem(
+          icon: Icons.import_export,
+          label: 'Legacy Import Wizard',
+          screen: const ImportWizardScreen(),
+        ),
+      if (isAdmin)
+        _NavItem(
+          icon: Icons.settings,
+          label: 'Settings',
+          screen: const SettingsScreen(),
+        ),
     ];
 
     // Ensure selected index is valid
@@ -93,17 +145,20 @@ class _SidebarShellState extends ConsumerState<SidebarShell> {
         children: [
           NavigationRail(
             selectedIndex: _selectedIndex,
-            onDestinationSelected: (idx) => setState(() => _selectedIndex = idx),
+            onDestinationSelected: (idx) =>
+                setState(() => _selectedIndex = idx),
             labelType: NavigationRailLabelType.all,
-            destinations: navItems.map((item) => NavigationRailDestination(
-              icon: Icon(item.icon),
-              label: Text(item.label),
-            )).toList(),
+            destinations: navItems
+                .map(
+                  (item) => NavigationRailDestination(
+                    icon: Icon(item.icon),
+                    label: Text(item.label),
+                  ),
+                )
+                .toList(),
           ),
           const VerticalDivider(thickness: 1, width: 1),
-          Expanded(
-            child: navItems[_selectedIndex].screen,
-          )
+          Expanded(child: navItems[_selectedIndex].screen),
         ],
       ),
     );

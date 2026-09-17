@@ -28,11 +28,7 @@ void main() async {
     await windowManager.focus();
   });
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class LocaleNotifier extends Notifier<Locale> {
@@ -40,7 +36,10 @@ class LocaleNotifier extends Notifier<Locale> {
   Locale build() => const Locale('en');
   void setLocale(Locale l) => state = l;
 }
-final localeProvider = NotifierProvider<LocaleNotifier, Locale>(() => LocaleNotifier());
+
+final localeProvider = NotifierProvider<LocaleNotifier, Locale>(
+  () => LocaleNotifier(),
+);
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
@@ -49,8 +48,8 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Determine user locale preference if logged in, else default
     final authState = ref.watch(authProvider);
-    final locale = authState.user != null 
-        ? Locale(authState.user!.preferredLanguage) 
+    final locale = authState.user != null
+        ? Locale(authState.user!.preferredLanguage)
         : ref.watch(localeProvider);
 
     return GestureDetector(
@@ -66,10 +65,7 @@ class MyApp extends ConsumerWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [
-          Locale('en', ''),
-          Locale('ur', ''),
-        ],
+        supportedLocales: const [Locale('en', ''), Locale('ur', '')],
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
           useMaterial3: true,
@@ -112,4 +108,7 @@ class RequiresSetupNotifier extends Notifier<bool> {
   bool build() => false;
   void setRequiresSetup(bool v) => state = v;
 }
-final requiresSetupProvider = NotifierProvider<RequiresSetupNotifier, bool>(() => RequiresSetupNotifier());
+
+final requiresSetupProvider = NotifierProvider<RequiresSetupNotifier, bool>(
+  () => RequiresSetupNotifier(),
+);

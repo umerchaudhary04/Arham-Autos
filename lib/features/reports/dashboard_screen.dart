@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/security/auth_provider.dart';
 
+import 'export_service.dart';
+
 final todaySalesProvider = FutureProvider<double>((ref) async {
   final db = ref.watch(databaseProvider);
   if (db == null) return 0.0;
@@ -23,7 +25,8 @@ class DashboardScreen extends ConsumerWidget {
     if (user == null) return const SizedBox.shrink();
 
     final isOperator = user.role == 'Operator';
-    
+    final isAdmin = user.role == 'Admin';
+
     final salesAsync = ref.watch(todaySalesProvider);
     final profitAsync = ref.watch(todayProfitProvider);
 
@@ -35,12 +38,42 @@ class DashboardScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Dashboard', style: Theme.of(context).textTheme.headlineMedium),
-              if (!isOperator)
+              Text(
+                'Dashboard',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              if (isAdmin) // Restricted entirely to Admin
                 ElevatedButton.icon(
-                  onPressed: () {
-                    // Trigger export (Mock structural call)
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Export triggered (Phase 5)')));
+                  onPressed: () async {
+                    final db = ref.read(databaseProvider);
+                    if (db == null) return;
+                    
+                    // Simple mock export logic for dashboard reporting sales & profit
+                    final sales = await db.reportsDao.getTodaySales();
+                    final profit = await db.reportsDao.getTodayProfit();
+                    
+                    final rows = [
+                      ['Metric', 'Value'],
+                      ['Today Sales', sales],
+                      ['Today Profit', profit],
+                      ['Margin', sales > 0 ? (profit/sales).toStringAsFixed(2) : 0]
+                    ];
+                    
+                    final svc = ExportService(db);
+                    try {
+                      final path = await svc.exportToCsv(user.id, rows, 'Dashboard_Report');
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Exported to $path')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Export failed: $e')),
+                        );
+                      }
+                    }
                   },
                   icon: const Icon(Icons.download),
                   label: const Text('Export Reports'),
@@ -48,7 +81,7 @@ class DashboardScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 24),
-          
+
           if (isOperator) ...[
             // Operator View: Today's Sales only, no profit margins
             Card(
@@ -57,10 +90,19 @@ class DashboardScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Today's Sales", style: TextStyle(fontSize: 18, color: Colors.grey)),
+                    const Text(
+                      "Today's Sales",
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
                     const SizedBox(height: 8),
                     salesAsync.when(
-                      data: (sales) => Text("Rs $sales", style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+                      data: (sales) => Text(
+                        "Rs $sales",
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       loading: () => const CircularProgressIndicator(),
                       error: (e, st) => const Text('Error'),
                     ),
@@ -73,27 +115,34 @@ class DashboardScreen extends ConsumerWidget {
             Row(
               children: [
                 _buildKpiCard(
-                  "Today's Sales", 
+                  "Today's Sales",
                   salesAsync.when(
                     data: (sales) => "Rs $sales",
                     loading: () => "...",
                     error: (e, st) => "Err",
-                  )
+                  ),
                 ),
                 const SizedBox(width: 16),
                 _buildKpiCard(
-                  "Gross Profit", 
+                  "Gross Profit",
                   profitAsync.when(
                     data: (profit) => "Rs $profit",
                     loading: () => "...",
                     error: (e, st) => "Err",
                   ),
-                  isHighlight: true
+                  isHighlight: true,
                 ),
                 const SizedBox(width: 16),
-                _buildKpiCard("Receivables", "Rs 0"), // Placeholder for Receivables
+                _buildKpiCard(
+                  "Receivables",
+                  "Rs 0",
+                ), // Placeholder for Receivables
                 const SizedBox(width: 16),
-                _buildKpiCard("Low Stock", "0 items", isAlert: true), // Placeholder for Low Stock
+                _buildKpiCard(
+                  "Low Stock",
+                  "0 items",
+                  isAlert: true,
+                ), // Placeholder for Low Stock
               ],
             ),
           ],
@@ -102,18 +151,34 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildKpiCard(String title, String value, {bool isHighlight = false, bool isAlert = false}) {
+  Widget _buildKpiCard(
+    String title,
+    String value, {
+    bool isHighlight = false,
+    bool isAlert = false,
+  }) {
     return Expanded(
       child: Card(
-        color: isHighlight ? Colors.teal.shade50 : (isAlert ? Colors.amber.shade50 : null),
+        color: isHighlight
+            ? Colors.teal.shade50
+            : (isAlert ? Colors.amber.shade50 : null),
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 18, color: Colors.grey)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 18, color: Colors.grey),
+              ),
               const SizedBox(height: 8),
-              Text(value, style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),

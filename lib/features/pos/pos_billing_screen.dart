@@ -14,7 +14,7 @@ class PosBillingScreen extends ConsumerStatefulWidget {
 class _PosBillingScreenState extends ConsumerState<PosBillingScreen> {
   final _searchFocusNode = FocusNode();
   final _searchController = TextEditingController();
-  
+
   DateTime? _lastKeystrokeTime;
   String _barcodeBuffer = '';
 
@@ -39,7 +39,8 @@ class _PosBillingScreenState extends ConsumerState<PosBillingScreen> {
 
       // Barcode Wedge Detection: rapid keystrokes (< 50ms between keys)
       final now = DateTime.now();
-      if (_lastKeystrokeTime != null && now.difference(_lastKeystrokeTime!).inMilliseconds < 50) {
+      if (_lastKeystrokeTime != null &&
+          now.difference(_lastKeystrokeTime!).inMilliseconds < 50) {
         if (event.character != null) {
           _barcodeBuffer += event.character!;
         } else if (event.logicalKey == LogicalKeyboardKey.enter) {
@@ -60,7 +61,7 @@ class _PosBillingScreenState extends ConsumerState<PosBillingScreen> {
 
   void _handleSearchSubmit(String value) {
     if (value.isEmpty) return;
-    
+
     // In a real implementation, search DB via partsDao
     // If exact match, auto-add 1 quantity
     // Mocking addition for structural setup
@@ -70,7 +71,10 @@ class _PosBillingScreenState extends ConsumerState<PosBillingScreen> {
   }
 
   void _overridePrice() async {
-    final auth = await AdminPinModal.show(context, 'Override Unit Price or Discount');
+    final auth = await AdminPinModal.show(
+      context,
+      'Override Unit Price or Discount',
+    );
     if (auth) {
       // Show discount modal and apply via posCartProvider
       ref.read(posCartProvider.notifier).setDiscount(500.0);
@@ -81,9 +85,15 @@ class _PosBillingScreenState extends ConsumerState<PosBillingScreen> {
   void _checkout() async {
     final success = await ref.read(posCartProvider.notifier).checkout();
     if (success) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Checkout Complete. Printing...')));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Checkout Complete. Printing...')),
+        );
     } else {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Checkout Failed.')));
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Checkout Failed.')));
     }
     _searchFocusNode.requestFocus();
   }
@@ -100,9 +110,12 @@ class _PosBillingScreenState extends ConsumerState<PosBillingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('POS Billing', style: Theme.of(context).textTheme.headlineMedium),
+            Text(
+              'POS Billing',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
             const SizedBox(height: 16),
-            
+
             // Search / Scan Input
             TextField(
               controller: _searchController,
@@ -114,9 +127,9 @@ class _PosBillingScreenState extends ConsumerState<PosBillingScreen> {
               ),
               onSubmitted: _handleSearchSubmit,
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Cart Items List
             Expanded(
               child: ListView.builder(
@@ -125,21 +138,35 @@ class _PosBillingScreenState extends ConsumerState<PosBillingScreen> {
                   final item = cartState.items[index];
                   return ListTile(
                     title: Text(item.partId),
-                    subtitle: Text('Qty: ${item.quantity} x ₨ ${item.unitPrice}'),
+                    subtitle: Text(
+                      'Qty: ${item.quantity} x ₨ ${item.unitPrice}',
+                    ),
                     trailing: Text('₨ ${item.quantity * item.unitPrice}'),
                   );
                 },
               ),
             ),
-            
+
             // Totals and Actions
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Subtotal: ₨ ${cartState.subtotal}', style: const TextStyle(fontSize: 18)),
-                Text('Discount: ₨ ${cartState.discount}', style: const TextStyle(fontSize: 18, color: Colors.red)),
-                Text('Total: ₨ ${cartState.total}', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                Text(
+                  'Subtotal: ₨ ${cartState.subtotal}',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                Text(
+                  'Discount: ₨ ${cartState.discount}',
+                  style: const TextStyle(fontSize: 18, color: Colors.red),
+                ),
+                Text(
+                  'Total: ₨ ${cartState.total}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),

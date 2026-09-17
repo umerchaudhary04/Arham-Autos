@@ -8,10 +8,17 @@ class PaperWidthNotifier extends Notifier<int> {
   @override
   int build() => 80; // 80mm or 58mm
 }
-final paperWidthProvider = NotifierProvider<PaperWidthNotifier, int>(() => PaperWidthNotifier());
+
+final paperWidthProvider = NotifierProvider<PaperWidthNotifier, int>(
+  () => PaperWidthNotifier(),
+);
 
 class PrintService {
-  Future<void> printInvoiceSilently(String invoiceId, int paperWidthMm, Map<String, dynamic> invoiceData) async {
+  Future<void> printInvoiceSilently(
+    String invoiceId,
+    int paperWidthMm,
+    Map<String, dynamic> invoiceData,
+  ) async {
     final pdf = pw.Document();
 
     // Use a widely available font that supports Arabic/Urdu, e.g., Lateef or Noto Nastaliq Urdu.
@@ -29,8 +36,14 @@ class PrintService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.center,
             children: [
-              pw.Text('Arham Autos', style: pw.TextStyle(font: urduFont, fontSize: 20)),
-              pw.Text('Invoice #$invoiceId', style: const pw.TextStyle(fontSize: 10)),
+              pw.Text(
+                'Arham Autos',
+                style: pw.TextStyle(font: urduFont, fontSize: 20),
+              ),
+              pw.Text(
+                'Invoice #$invoiceId',
+                style: const pw.TextStyle(fontSize: 10),
+              ),
               pw.SizedBox(height: 10),
               pw.Divider(),
               // Items placeholder
@@ -38,19 +51,31 @@ class PrintService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('Item Name', style: const pw.TextStyle(fontSize: 10)),
-                  pw.Text('Qty x Price', style: const pw.TextStyle(fontSize: 10)),
-                ]
+                  pw.Text(
+                    'Qty x Price',
+                    style: const pw.TextStyle(fontSize: 10),
+                  ),
+                ],
               ),
               pw.Divider(),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text('Total', style: pw.TextStyle(font: urduFont, fontSize: 14)),
-                  pw.Text('Rs ${invoiceData['totalAmount']}', style: const pw.TextStyle(fontSize: 14)),
-                ]
+                  pw.Text(
+                    'Total',
+                    style: pw.TextStyle(font: urduFont, fontSize: 14),
+                  ),
+                  pw.Text(
+                    'Rs ${invoiceData['totalAmount']}',
+                    style: const pw.TextStyle(fontSize: 14),
+                  ),
+                ],
               ),
               pw.SizedBox(height: 10),
-              pw.Text('Thank you!', style: pw.TextStyle(font: urduFont, fontSize: 12)),
+              pw.Text(
+                'Thank you!',
+                style: pw.TextStyle(font: urduFont, fontSize: 12),
+              ),
             ],
           );
         },
@@ -64,7 +89,9 @@ class PrintService {
     final printers = await Printing.info();
     if (printers.directPrint) {
       final availablePrinters = await Printing.listPrinters();
-      final targetPrinter = availablePrinters.where((p) => p.isDefault).firstOrNull ?? availablePrinters.firstOrNull;
+      final targetPrinter =
+          availablePrinters.where((p) => p.isDefault).firstOrNull ??
+          availablePrinters.firstOrNull;
 
       if (targetPrinter != null) {
         await Printing.directPrintPdf(

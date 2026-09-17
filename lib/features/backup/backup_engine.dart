@@ -5,7 +5,7 @@ import '../../core/db/database.dart';
 
 class BackupEngine {
   final AppDatabase db;
-  
+
   BackupEngine(this.db);
 
   /// Manual Backup Trigger
@@ -14,7 +14,7 @@ class BackupEngine {
     final timestamp = DateFormat('yyyy-MM-dd_HHmm').format(now);
     final backupFileName = 'arham_backup_$timestamp.db';
     final targetPath = '$targetDirectoryPath\\$backupFileName';
-    
+
     // We use a unique ID for the log
     final backupId = 'bck_${now.millisecondsSinceEpoch}';
 
@@ -27,32 +27,42 @@ class BackupEngine {
       }
 
       final sourceBytes = await sourceFile.length();
-      
+
       // Perform the copy
       await sourceFile.copy(targetPath);
 
       // Log success
-      await db.into(db.backupLog).insert(BackupLogCompanion.insert(
-        backupId: backupId,
-        filePath: targetPath,
-        sizeBytes: Value(sourceBytes),
-        status: 'SUCCESS',
-      ));
+      await db
+          .into(db.backupLog)
+          .insert(
+            BackupLogCompanion.insert(
+              backupId: backupId,
+              filePath: targetPath,
+              sizeBytes: Value(sourceBytes),
+              status: 'SUCCESS',
+            ),
+          );
 
       return true;
     } catch (e) {
       // Log failure
-      await db.into(db.backupLog).insert(BackupLogCompanion.insert(
-        backupId: backupId,
-        filePath: targetPath,
-        status: 'FAILED',
-      ));
+      await db
+          .into(db.backupLog)
+          .insert(
+            BackupLogCompanion.insert(
+              backupId: backupId,
+              filePath: targetPath,
+              status: 'FAILED',
+            ),
+          );
       return false;
     }
   }
 
   /// Calculates folder size and free space for display
-  Future<Map<String, dynamic>> getBackupDirectoryStats(String targetDirectoryPath) async {
+  Future<Map<String, dynamic>> getBackupDirectoryStats(
+    String targetDirectoryPath,
+  ) async {
     final dir = Directory(targetDirectoryPath);
     if (!await dir.exists()) return {'folderSize': 0, 'freeSpace': 0};
 
@@ -66,8 +76,8 @@ class BackupEngine {
     } catch (e) {
       // Ignored for now
     }
-    
-    // NOTE: In Windows, getting free disk space programmatically via pure Dart 
+
+    // NOTE: In Windows, getting free disk space programmatically via pure Dart
     // requires ffi or specific packages. We will mock this or rely on a platform channel.
     // For now returning 0 for freeSpace.
     return {
@@ -79,7 +89,7 @@ class BackupEngine {
   Future<Directory> _getAppDbDirectory() async {
     final appData = Platform.environment['APPDATA'] ?? '';
     if (appData.isNotEmpty) {
-       return Directory('$appData\\ArhamAutos');
+      return Directory('$appData\\ArhamAutos');
     }
     return Directory('${Directory.current.path}\\ArhamAutos');
   }

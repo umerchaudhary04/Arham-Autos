@@ -45,8 +45,9 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
 
   void _completeSetup() async {
     final keyStore = ref.read(encryptionKeyStoreProvider);
-    final rawKey = 'SECURE_KEY_${DateTime.now().millisecondsSinceEpoch}'; // Ideally derived cryptographically
-    
+    final rawKey =
+        'SECURE_KEY_${DateTime.now().millisecondsSinceEpoch}'; // Ideally derived cryptographically
+
     // Save to DPAPI
     await keyStore.saveKey(rawKey);
 
@@ -54,29 +55,45 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
     final db = AppDatabase(rawKey);
 
     // Create Admin User
-    await db.into(db.localUsers).insert(LocalUsersCompanion.insert(
-      id: 'admin_1',
-      fullName: _nameController.text,
-      username: _usernameController.text,
-      passwordHash: _passwordController.text, // Mocked, ideally hashed
-      pinHash: _pinController.text,
-      role: 'Admin',
-      preferredLanguage: drift.Value(_selectedLang),
-    ));
+    await db
+        .into(db.localUsers)
+        .insert(
+          LocalUsersCompanion.insert(
+            id: 'admin_1',
+            fullName: _nameController.text,
+            username: _usernameController.text,
+            passwordHash: _passwordController.text, // Mocked, ideally hashed
+            pinHash: _pinController.text,
+            role: 'Admin',
+            preferredLanguage: drift.Value(_selectedLang),
+          ),
+        );
 
     // Save configuration
-    await db.into(db.appConfig).insert(AppConfigCompanion.insert(
-      configKey: 'backup_location',
-      configValue: _backupLocation!,
-    ));
-    await db.into(db.appConfig).insert(AppConfigCompanion.insert(
-      configKey: 'idle_timeout',
-      configValue: '300', // Default 5 mins
-    ));
-    await db.into(db.appConfig).insert(AppConfigCompanion.insert(
-      configKey: 'default_language',
-      configValue: _selectedLang,
-    ));
+    await db
+        .into(db.appConfig)
+        .insert(
+          AppConfigCompanion.insert(
+            configKey: 'backup_location',
+            configValue: _backupLocation!,
+          ),
+        );
+    await db
+        .into(db.appConfig)
+        .insert(
+          AppConfigCompanion.insert(
+            configKey: 'idle_timeout',
+            configValue: '300', // Default 5 mins
+          ),
+        );
+    await db
+        .into(db.appConfig)
+        .insert(
+          AppConfigCompanion.insert(
+            configKey: 'default_language',
+            configValue: _selectedLang,
+          ),
+        );
 
     // Update state to trigger navigation
     if (!mounted) return;
@@ -128,11 +145,32 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
             isActive: _currentStep >= 0,
             content: Column(
               children: [
-                TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Full Name')),
-                TextField(controller: _usernameController, decoration: const InputDecoration(labelText: 'Username')),
-                TextField(controller: _passwordController, obscureText: true, decoration: const InputDecoration(labelText: 'Password')),
-                TextField(controller: _confirmPasswordController, obscureText: true, decoration: const InputDecoration(labelText: 'Confirm Password')),
-                TextField(controller: _pinController, obscureText: true, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'PIN')),
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'Full Name'),
+                ),
+                TextField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(labelText: 'Username'),
+                ),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                ),
+                TextField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm Password',
+                  ),
+                ),
+                TextField(
+                  controller: _pinController,
+                  obscureText: true,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(labelText: 'PIN'),
+                ),
               ],
             ),
           ),
@@ -156,19 +194,35 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
             isActive: _currentStep >= 2,
             content: Column(
               children: [
-                const Text('Save this Recovery Key safely! It is the ONLY way to recover your database if this PC breaks.',
-                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Save this Recovery Key safely! It is the ONLY way to recover your database if this PC breaks.',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 const SizedBox(height: 16),
-                SelectableText(_recoveryKey, style: const TextStyle(fontSize: 24, letterSpacing: 2, fontFamily: 'Courier')),
+                SelectableText(
+                  _recoveryKey,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    letterSpacing: 2,
+                    fontFamily: 'Courier',
+                  ),
+                ),
                 const SizedBox(height: 16),
                 CheckboxListTile(
-                  title: const Text('I have printed or securely saved this key.'),
+                  title: const Text(
+                    'I have printed or securely saved this key.',
+                  ),
                   value: _keySaved,
                   onChanged: (v) => setState(() => _keySaved = v!),
                 ),
                 TextField(
                   controller: _retypeKeyController,
-                  decoration: const InputDecoration(labelText: 'Retype the last 4 characters to confirm'),
+                  decoration: const InputDecoration(
+                    labelText: 'Retype the last 4 characters to confirm',
+                  ),
                   maxLength: 4,
                 ),
               ],
@@ -204,7 +258,9 @@ class _SetupWizardState extends ConsumerState<SetupWizard> {
                   onChanged: (v) => setState(() => _importNow = v!),
                 ),
                 RadioListTile<bool>(
-                  title: const Text('Yes, run Import Wizard (Coming in Phase 5)'),
+                  title: const Text(
+                    'Yes, run Import Wizard (Coming in Phase 5)',
+                  ),
                   value: true,
                   groupValue: _importNow,
                   onChanged: null, // Disabled per requirements

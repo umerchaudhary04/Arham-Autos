@@ -6,7 +6,10 @@ class DatabaseNotifier extends Notifier<AppDatabase?> {
   AppDatabase? build() => null;
   void setDatabase(AppDatabase db) => state = db;
 }
-final databaseProvider = NotifierProvider<DatabaseNotifier, AppDatabase?>(() => DatabaseNotifier());
+
+final databaseProvider = NotifierProvider<DatabaseNotifier, AppDatabase?>(
+  () => DatabaseNotifier(),
+);
 
 // Model for the authenticated user
 class AuthState {
@@ -32,7 +35,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<bool> loginWithPin(String pin) async {
     final db = ref.read(databaseProvider);
     if (db == null) return false;
-    
+
     // In a real implementation we'd hash the pin and compare.
     // For now we'll do a mock verification.
     final users = await db.select(db.localUsers).get();
@@ -51,7 +54,9 @@ class AuthNotifier extends Notifier<AuthState> {
 
     // In a real implementation we'd hash the password.
     final users = await db.select(db.localUsers).get();
-    final user = users.where((u) => u.username == username && u.passwordHash == password).firstOrNull;
+    final user = users
+        .where((u) => u.username == username && u.passwordHash == password)
+        .firstOrNull;
 
     if (user != null) {
       state = AuthState(user: user, isLocked: false);
@@ -69,11 +74,18 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 
   void switchUser() {
-    // This retains the current state but locks it, or navigates back to login
     // which effectively acts as locked, waiting for another PIN.
     // Parked cart logic will be triggered by UI/Flow.
     state = const AuthState(user: null, isLocked: true);
   }
+
+  void updateUserLanguage(String lang) {
+    if (state.user != null) {
+      state = AuthState(isLocked: state.isLocked, user: state.user!.copyWith(preferredLanguage: lang));
+    }
+  }
 }
 
-final authProvider = NotifierProvider<AuthNotifier, AuthState>(() => AuthNotifier());
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(
+  () => AuthNotifier(),
+);

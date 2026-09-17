@@ -4,7 +4,7 @@ import 'auth_provider.dart';
 
 class IdleLockNotifier extends Notifier<int> {
   Timer? _timer;
-  
+
   @override
   int build() {
     return 300; // Default 5 minutes (300 seconds)
@@ -31,4 +31,6 @@ class IdleLockNotifier extends Notifier<int> {
   }
 }
 
-final idleLockProvider = NotifierProvider<IdleLockNotifier, int>(() => IdleLockNotifier());
+final idleLockProvider = NotifierProvider<IdleLockNotifier, int>(
+  () => IdleLockNotifier(),
+);
