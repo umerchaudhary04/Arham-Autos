@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/db/database.dart';
+import '../../core/security/auth_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' as drift;
 
-final coaProvider = FutureProvider<List<ChartOfAccountsData>>((ref) async {
+final coaProvider = FutureProvider<List<ChartOfAccount>>((ref) async {
   final db = ref.watch(databaseProvider);
   if (db == null) return [];
   return db.select(db.chartOfAccounts).get();

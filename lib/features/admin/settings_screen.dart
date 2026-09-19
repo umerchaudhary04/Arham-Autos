@@ -6,6 +6,7 @@ import '../../core/security/auth_provider.dart';
 import '../../core/security/idle_lock_provider.dart';
 import '../../main.dart'; // for localeProvider
 import 'package:uuid/uuid.dart';
+import 'package:drift/drift.dart' as drift;
 
 final usersListProvider = FutureProvider<List<LocalUser>>((ref) async {
   final db = ref.watch(databaseProvider);
