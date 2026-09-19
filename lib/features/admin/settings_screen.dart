@@ -19,6 +19,12 @@ final auditLogProvider = FutureProvider<List<AuditLogData>>((ref) async {
   return (db.select(db.auditLog)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();
 });
 
+final areasListProvider = FutureProvider<List<Area>>((ref) async {
+  final db = ref.watch(databaseProvider);
+  if (db == null) return [];
+  return db.select(db.areas).get();
+});
+
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -144,6 +150,45 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  void _showAddAreaDialog() {
+    final nameCtrl = TextEditingController();
+    final cityCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Add New Area'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Area Name')),
+              TextField(controller: cityCtrl, decoration: const InputDecoration(labelText: 'City')),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            ElevatedButton(
+              onPressed: () async {
+                if (nameCtrl.text.isEmpty) return;
+                
+                final db = ref.read(databaseProvider)!;
+                await db.into(db.areas).insert(AreasCompanion.insert(
+                  areaId: const Uuid().v4(),
+                  areaName: nameCtrl.text,
+                  city: drift.Value(cityCtrl.text),
+                ));
+                ref.invalidate(areasListProvider);
+                Navigator.pop(ctx);
+              },
+              child: const Text('Save Area'),
+            ),
+          ],
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final usersAsync = ref.watch(usersListProvider);
@@ -206,6 +251,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ],
               ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Area Management', style: Theme.of(context).textTheme.titleLarge),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.map),
+                label: const Text('Add Area'),
+                onPressed: _showAddAreaDialog,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: ref.watch(areasListProvider).when(
+              data: (areas) {
+                if (areas.isEmpty) return const Center(child: Text('No areas defined.'));
+                return ListView.builder(
+                  itemCount: areas.length,
+                  itemBuilder: (context, index) {
+                    final area = areas[index];
+                    return Card(
+                      child: ListTile(
+                        title: Text(area.areaName),
+                        subtitle: Text(area.city ?? ''),
+                      ),
+                    );
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, st) => Center(child: Text('Error: $e')),
             ),
           ),
 

@@ -11,6 +11,8 @@ import '../reports/reports_screen.dart';
 import '../import/import_wizard_screen.dart';
 import '../returns/returns_claims_screen.dart';
 import '../admin/backup_restore_screen.dart';
+import '../gl/gl_screen.dart';
+import '../hr/hr_screen.dart';
 import 'settings_screen.dart';
 
 class SidebarShell extends ConsumerStatefulWidget {
@@ -99,6 +101,18 @@ class _SidebarShellState extends ConsumerState<SidebarShell> {
           icon: Icons.analytics,
           label: 'Reports',
           screen: const ReportsScreen(),
+        ),
+      if (isManager)
+        _NavItem(
+          icon: Icons.account_balance,
+          label: 'Accounts & Expenses',
+          screen: const GlScreen(),
+        ),
+      if (isManager)
+        _NavItem(
+          icon: Icons.people,
+          label: 'Employees',
+          screen: const HrScreen(),
         ),
       if (isAdmin)
         _NavItem(

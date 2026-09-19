@@ -120,12 +120,56 @@ class FifoInventoryBatches extends Table {
   Set<Column> get primaryKey => {batchId};
 }
 
+class Areas extends Table {
+  TextColumn get areaId => text()();
+  TextColumn get areaName => text()();
+  TextColumn get city => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {areaId};
+}
+
+class Employees extends Table {
+  TextColumn get employeeId => text()();
+  TextColumn get fullName => text()();
+  TextColumn get jobTitle => text().nullable()();
+  DateTimeColumn get hireDate => dateTime().nullable()();
+  RealColumn get currentSalary => real().withDefault(const Constant(0.0))();
+
+  @override
+  Set<Column> get primaryKey => {employeeId};
+}
+
+class ChartOfAccounts extends Table {
+  TextColumn get accountId => text()();
+  TextColumn get accountName => text()();
+  TextColumn get accountType => text()(); // 'Asset', 'Liability', 'Equity', 'Revenue', 'Expense'
+  RealColumn get currentBalance => real().withDefault(const Constant(0.0))();
+
+  @override
+  Set<Column> get primaryKey => {accountId};
+}
+
+class GlTransactions extends Table {
+  TextColumn get transactionId => text()();
+  TextColumn get accountId => text()(); // References chart_of_accounts(accountId)
+  RealColumn get amount => real()(); // Positive for Debit, Negative for Credit? Or separate columns. Let's just use amount and let business logic handle debit/credit based on account type, or explicit debit/credit columns. Let's use amount.
+  TextColumn get transactionType => text()(); // e.g., 'Expense', 'Payment', 'Journal'
+  TextColumn get description => text().nullable()();
+  DateTimeColumn get transactionDate => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get recordedBy => text()(); // References local_users(id)
+
+  @override
+  Set<Column> get primaryKey => {transactionId};
+}
+
 class AccountsLedger extends Table {
   TextColumn get accountId => text()();
   TextColumn get accountName => text()();
   TextColumn get accountType => text()(); // 'Customer', 'Supplier'
   RealColumn get currentBalance => real().withDefault(const Constant(0.0))();
   RealColumn get creditLimit => real().nullable()();
+  TextColumn get areaId => text().nullable()(); // Added in Phase 7
 
   @override
   Set<Column> get primaryKey => {accountId};
@@ -173,6 +217,10 @@ class InvoiceItems extends Table {
     AccountsLedger,
     SalesInvoices,
     InvoiceItems,
+    Areas,
+    Employees,
+    ChartOfAccounts,
+    GlTransactions,
   ],
   daos: [PartsDao, PosDao, LedgerDao, UsersDao, ReportsDao],
 )
